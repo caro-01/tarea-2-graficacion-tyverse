@@ -54,7 +54,7 @@ rios <-
          promedio = (pandora + banano) / 2)
 ```
 
-```{r pandora} 
+```{r Sumarización} 
 # Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
 rios_sumarizados_x_mes <-  
   rios %>%  
@@ -62,10 +62,62 @@ rios_sumarizados_x_mes <-
   rename(fecha = fecha, caudal_pandora = pandora, caudal_banano = banano) %>%  
   mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
   group_by( mes = format(fecha,"%m")) %>%   
-  summarise(suma_cauda_pandora = sum(caudal_pandora ), suma_cauda_banano = sum(caudal_banano)) 
+  summarise(Total_mes_pandora = sum(caudal_pandora ), Total_mes_banano = sum(caudal_banano)) 
 
 # Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
 rios_sumarizados_x_mes
 
+```
+
+#```{r Gráfico_apilado}
+# Generación de un nuevo data frame
+#rios_sumarizados_x_mes <-
+# rios %>%
+   # dplyr::count(fecha, Total_mes_pandora)
+
+# Gráfico de barras apiladas
+
+#ggplot(
+ # registros_caudal_agrupado_x_mes_rio, 
+ # aes(x = species, y = n, fill = basisOfRecord)
+#) +
+  #geom_col() +
+ # coord_flip()
+
+
+#```
+
+# Histograma con la distribución de los casos nuevos de covid en Costa Rica
+
+```{r Caragar datos Covid-19}
+
+# Carga de datos desde un archivo CSV
+covid <- 
+  read.csv(
+    file='https://raw.githubusercontent.com/tpb728O-programaciongeoespacialr/2021ii/main/datos/minsalud/covid/ultimafecha_CSV_GENERAL.csv', 
+    sep = ","
+  )
+
+```
+
+```{r Preparar_datos_Covid}
+
+# Histograma de casos nuevos de positivos de Covid - 19
+
+covid_histo <-
+  covid %>%
+  select(FECHA, nue_posi) %>%
+  rename(fecha = FECHA, nuevos_positivos = nue_posi) %>%
+  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y"))
+
+```
+
+```{r hacer_gráfico}
+ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
+  geom_histogram(stat= 'identity', color= "dark blue", binwidth = 2) +
+  ggtitle("Distribución de casos nuevos positivos de Covid-19, Costa Rica") +
+  xlab("Fecha") +
+  ylab("Casos nuevos") +
+  theme_replace()
 ```
 

@@ -220,6 +220,32 @@ rios &lt;-
   rios %&gt;%
   mutate(fecha = as.Date(fecha, format = &quot;%m/%d/%Y&quot;),
          promedio = (pandora + banano) / 2)</code></pre>
+<pre class="r"><code># Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
+rios_sumarizados_x_mes &lt;-  
+  rios %&gt;%  
+  select(fecha, pandora, banano) %&gt;%   
+  rename(fecha = fecha, caudal_pandora = pandora, caudal_banano = banano) %&gt;%  
+  mutate(fecha = as.Date(fecha, format = &quot;%d/%m/%Y&quot;)) %&gt;%   
+  group_by( mes = format(fecha,&quot;%m&quot;)) %&gt;%   
+  summarise(suma_cauda_pandora = sum(caudal_pandora ), suma_cauda_banano = sum(caudal_banano)) 
+
+# Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
+rios_sumarizados_x_mes</code></pre>
+<pre><code>## # A tibble: 12 x 3
+##    mes   suma_cauda_pandora suma_cauda_banano
+##    &lt;chr&gt;              &lt;dbl&gt;             &lt;dbl&gt;
+##  1 01                 1523.             4265.
+##  2 02                 1240.             3655.
+##  3 03                 1243.             2699.
+##  4 04                 1275.             3163.
+##  5 05                 1392.             4646.
+##  6 06                 1898.             5302.
+##  7 07                 2484.             6013.
+##  8 08                 2441.             4768.
+##  9 09                 1567.             4016.
+## 10 10                 1710.             4211.
+## 11 11                 1776.             5877.
+## 12 12                 2442.             6284.</code></pre>
 </div>
 
 
