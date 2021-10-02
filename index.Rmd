@@ -8,6 +8,26 @@ output: html_document
 library(dplyr)
 ```
 
+```{r}
+# Carga de graphics
+library(graphics)
+```
+
+```{r}
+# Carga de ggplot2
+library(ggplot2)
+```
+
+```{r}
+# Carga de plotly
+library(plotly)
+```
+
+```{r}
+# Carga de tidyverse
+library(tidyverse)
+```
+
 ## 1. Realizar un gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año:
 
 
@@ -32,5 +52,20 @@ rios <-
   rios %>%
   mutate(fecha = as.Date(fecha, format = "%m/%d/%Y"),
          promedio = (pandora + banano) / 2)
+```
+
+```{r pandora} 
+# Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
+rios_sumarizados_x_mes <-  
+  rios %>%  
+  select(fecha, pandora, banano) %>%   
+  rename(fecha = fecha, caudal_pandora = pandora, caudal_banano = banano) %>%  
+  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
+  group_by( mes = format(fecha,"%m")) %>%   
+  summarise(suma_cauda_pandora = sum(caudal_pandora ), suma_cauda_banano = sum(caudal_banano)) 
+
+# Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
+rios_sumarizados_x_mes
+
 ```
 
