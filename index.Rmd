@@ -133,16 +133,39 @@ covid <-
          promedio = (mujeres_fallecidas + hombres_fallecidos) / 2)
 ```
 
-```{r}
-# Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
+```{r }
+# Selección, renombramiento, filtrado y conversión de columnas datos_covid_sumarizado_x_mes 
 datos_covid_sumarizados_x_mes <-  
   covid %>%  
   select(fecha, mujeres_fallecidas, hombres_fallecidos) %>%   
   rename(fecha = fecha, mujeres = mujeres_fallecidas, hombres = hombres_fallecidos) %>%  
   mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
-  group_by( mes = format(fecha,"%m")) %>% 
+  group_by(mes = format(fecha,"%m")) %>% 
   summarise(suma_mujeres_fallecidas = sum(mujeres), suma_hombres_fallecidos = sum(hombres)) 
 
-# Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
+# Despliegue del data frame con los resultados rios_sumarizado_x_mes
 datos_covid_sumarizados_x_mes
 ```
+
+```{r Gráfico_ barras_agrupado_covid}
+# Generación de un nuevo data frame
+
+ggplot(
+  datos_covid_sumarizados_x_mes,
+  aes(x = mes, y = (suma_mujeres_fallecidas), (suma_hombres_fallecidos))) +
+  
+geom_col(position = "dodge") +
+  coord_flip() +
+  ggtitle("Fallecidos por Covid-19 en Costa Rica") +
+  xlab("Mes") +
+  ylab("Total fallecidos") +
+  theme_ipsum_pub()
+
+```
+
+```{r}
+ggplot()+
+  geom_col(data = sum(mujeres), aes (x = mes, y = suma_mujeres_fallecidas, color = "blue"))+
+  geom_col(data = sum(hombres), aes (x = mes, y = suma_hombres_fallecidos, color = "green"))
+```
+
