@@ -37,7 +37,7 @@ rios <-
   read.csv(file = 'https://raw.githubusercontent.com/tpb728O-programaciongeoespacialr/2021ii/main/datos/hidrologia/fdc/fdc.csv')
 ```
 
-```{r}
+```{r Cambiar nombre columas ríos}
 # Cambio de nombre de las columnas mediante rename()
 rios <-
   rios %>%
@@ -46,7 +46,7 @@ rios <-
          banano = Banano.mm..90km2.)
 ```
 
-```{r}
+```{r Convertir columna fecha}
 # Conversión de una columna a tipo Date y creación de una nueva columna
 rios <-
   rios %>%
@@ -69,38 +69,33 @@ rios_sumarizados_x_mes
 
 ```
 
-#```{r Gráfico_apilado}
+```{r Gráfico_ barras_apilado}
 # Generación de un nuevo data frame
-#rios_sumarizados_x_mes <-
-# rios %>%
-   # dplyr::count(fecha, Total_mes_pandora)
 
-# Gráfico de barras apiladas
+ggplot(
+  rios_sumarizados_x_mes, 
+  aes(x = mes, y = Total_mes_pandora, Total_mes_banano)
+) +
+  
+geom_col(position = "dodge") +
+  coord_flip() +
+  ggtitle("Sumatoria del caudal de los ríos Pandora y Banano") +
+  xlab("Mes") +
+  ylab("Total caudal") +
+  theme_modern_rc()
 
-#ggplot(
- # registros_caudal_agrupado_x_mes_rio, 
- # aes(x = species, y = n, fill = basisOfRecord)
-#) +
-  #geom_col() +
- # coord_flip()
+```
 
-
-#```
-
-# Histograma con la distribución de los casos nuevos de covid en Costa Rica
-
-```{r Caragar datos Covid-19}
-
+```{r}
 # Carga de datos desde un archivo CSV
 covid <- 
   read.csv(
     file='https://raw.githubusercontent.com/tpb728O-programaciongeoespacialr/2021ii/main/datos/minsalud/covid/ultimafecha_CSV_GENERAL.csv', 
     sep = ","
   )
-
 ```
 
-```{r Preparar_datos_Covid}
+```{r Preparar datos Covid}
 
 # Histograma de casos nuevos de positivos de Covid - 19
 
@@ -121,3 +116,33 @@ ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
   theme_replace()
 ```
 
+```{r Cambiar nombre columnas Covid}
+# Cambio de nombre de las columnas mediante rename()
+covid <-
+  covid %>%
+  rename(fecha = FECHA,
+         mujeres_fallecidas = muj_fall,
+         hombres_fallecidos = hom_fall)
+```
+
+```{r Conversión columna datos Covid}
+# Conversión de una columna a tipo Date y creación de una nueva columna
+covid <-
+  covid %>%
+  mutate (fecha = as.Date(fecha, format = "%m/%d/%Y"),
+         promedio = (mujeres_fallecidas + hombres_fallecidos) / 2)
+```
+
+```{r}
+# Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
+datos_covid_sumarizados_x_mes <-  
+  covid %>%  
+  select(fecha, mujeres_fallecidas, hombres_fallecidos) %>%   
+  rename(fecha = fecha, mujeres = mujeres_fallecidas, hombres = hombres_fallecidos) %>%  
+  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
+  group_by( mes = format(fecha,"%m")) %>% 
+  summarise(suma_mujeres_fallecidas = sum(mujeres), suma_hombres_fallecidos = sum(hombres)) 
+
+# Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
+datos_covid_sumarizados_x_mes
+```
