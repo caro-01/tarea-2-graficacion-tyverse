@@ -3,7 +3,11 @@ title: "Tarea 2: Graficación con Tidyverse"
 output: html_document
 ---
 
-```{r}
+#```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+#```
+
+```{r Cargar_libreria_dplyr, message = FALSE}
 # dplyr
 library(dplyr)
 ```
@@ -28,6 +32,12 @@ library(plotly)
 library(tidyverse)
 ```
 
+```{r}
+# Carga de hrbrthemes
+library(hrbrthemes)
+```
+
+
 ## 1. Realizar un gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año:
 
 
@@ -43,28 +53,21 @@ rios <-
   rios %>%
   rename(fecha = Tiempo,
          pandora = Pandora.mm..637km2.,
-         banano = Banano.mm..90km2.)
-```
-
-```{r Convertir columna fecha}
-# Conversión de una columna a tipo Date y creación de una nueva columna
-rios <-
-  rios %>%
-  mutate(fecha = as.Date(fecha, format = "%m/%d/%Y"),
-         promedio = (pandora + banano) / 2)
+         bananito = Banano.mm..90km2.)%>%
+  mutate(fecha = as.Date(fecha, format = "%m/%d/%Y"))
 ```
 
 ```{r Sumarización} 
 # Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
 rios_sumarizados_x_mes <-  
   rios %>%  
-  select(fecha, pandora, banano) %>%   
-  rename(fecha = fecha, caudal_pandora = pandora, caudal_banano = banano) %>%  
+  select(fecha, pandora, bananito) %>%   
+  rename(fecha = fecha, caudal_pandora = pandora, caudal_bananito = bananito) %>%  
   mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
-  group_by( mes = format(fecha,"%m")) %>%   
-  summarise(Total_mes_pandora = sum(caudal_pandora ), Total_mes_banano = sum(caudal_banano)) 
+  group_by(mes = format(fecha,"%m")) %>%   
+  summarise(Total_mes_pandora = sum(caudal_pandora ), Total_mes_bananito = sum(caudal_bananito)) 
 
-# Despliegue del data frame con los resultados rios_sumarizado_x_mes ```
+# Despliegue del data frame con los resultados rios_sumarizado_x_mes 
 rios_sumarizados_x_mes
 
 ```
@@ -72,19 +75,34 @@ rios_sumarizados_x_mes
 ```{r Gráfico_ barras_apilado}
 # Generación de un nuevo data frame
 
-ggplot(
-  rios_sumarizados_x_mes, 
-  aes(x = mes, y = Total_mes_pandora, Total_mes_banano)
-) +
-  
-geom_col(position = "dodge") +
-  coord_flip() +
-  ggtitle("Sumatoria del caudal de los ríos Pandora y Banano") +
-  xlab("Mes") +
-  ylab("Total caudal") +
-  theme_modern_rc()
+ggplot() + geom_col(   
+  data = rios_sumarizados_x_mes,    
+  aes(x = mes, y= Total_mes_bananito, fill = "Río Bananito"),   
+  width = 0.5,   
+  #position = "dodge"
 
+  )+
+  geom_col (     
+    data= rios_sumarizados_x_mes,     
+    aes(x = mes, y = Total_mes_pandora, fill = "Río Pandora"),     
+    width = 0.5,      
+    #position = "dodge",
+    
+    )+
+ 
+  ggtitle( "Caudal mensual de los ríos Pandora y Bananito, Costa Rica") +  
+  xlab("Mes") +   
+  ylab("Caudal") +
+  coord_flip() +
+  theme(     
+    legend.box = "horizontal",     
+    legend.key = element_blank(),     
+    legend.title = element_blank(),     
+    legend.position = "top"   )
+ 
 ```
+
+## 2. Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
 
 ```{r}
 # Carga de datos desde un archivo CSV
@@ -107,13 +125,23 @@ covid_histo <-
 
 ```
 
-```{r hacer_gráfico}
+```{r hacer_histograma}
 ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
-  geom_histogram(stat= 'identity', color= "dark blue", binwidth = 2) +
+  geom_histogram(stat= 'identity', color= "dark blue", binwidth = 1) +
   ggtitle("Distribución de casos nuevos positivos de Covid-19, Costa Rica") +
   xlab("Fecha") +
   ylab("Casos nuevos") +
   theme_replace()
+```
+## 3. Gráfico de barras agrupadas que muestre la cantidad de hombres y mujeres fallecidos por covid en Costa Rica por cada uno de los 12 meses del año.
+
+```{r}
+# Carga de datos desde un archivo CSV
+covid <- 
+  read.csv(
+    file='https://raw.githubusercontent.com/tpb728O-programaciongeoespacialr/2021ii/main/datos/minsalud/covid/ultimafecha_CSV_GENERAL.csv', 
+    sep = ","
+  )
 ```
 
 ```{r Cambiar nombre columnas Covid}
@@ -122,15 +150,8 @@ covid <-
   covid %>%
   rename(fecha = FECHA,
          mujeres_fallecidas = muj_fall,
-         hombres_fallecidos = hom_fall)
-```
-
-```{r Conversión columna datos Covid}
-# Conversión de una columna a tipo Date y creación de una nueva columna
-covid <-
-  covid %>%
-  mutate (fecha = as.Date(fecha, format = "%m/%d/%Y"),
-         promedio = (mujeres_fallecidas + hombres_fallecidos) / 2)
+         hombres_fallecidos = hom_fall) %>%
+  mutate (fecha = as.Date(fecha, format = "%m/%d/%Y"))
 ```
 
 ```{r }
@@ -141,31 +162,39 @@ datos_covid_sumarizados_x_mes <-
   rename(fecha = fecha, mujeres = mujeres_fallecidas, hombres = hombres_fallecidos) %>%  
   mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
   group_by(mes = format(fecha,"%m")) %>% 
-  summarise(suma_mujeres_fallecidas = sum(mujeres), suma_hombres_fallecidos = sum(hombres)) 
+  summarise(suma_mujeres_fallecidas = sum(mujeres), suma_hombres_fallecidos = sum(hombres)) %>%
+  filter(mes < 2)
 
 # Despliegue del data frame con los resultados rios_sumarizado_x_mes
 datos_covid_sumarizados_x_mes
 ```
 
-```{r Gráfico_ barras_agrupado_covid}
-# Generación de un nuevo data frame
-
-ggplot(
-  datos_covid_sumarizados_x_mes,
-  aes(x = mes, y = (suma_mujeres_fallecidas), (suma_hombres_fallecidos))) +
+```{r grafico_barras_agrupadas}
+# Grafico de barras agrupadas
+ggplot() + geom_col (
+    data = datos_covid_sumarizados_x_mes,     
+    aes(x = mes, y = suma_hombres_fallecidos, fill = "Hombres fallecidos"),     
+    width = 0.4
+    )+   
   
-geom_col(position = "dodge") +
+  geom_col (     
+  data = datos_covid_sumarizados_x_mes, 
+  aes(x = mes, y = suma_mujeres_fallecidas, fill = "Mujeres fallecidas"),
+  width = 0.4
+  )+
+  
+  ggtitle( "Total mujeres y hombres fallecidos por Covid-19 en Costa Rica") +   
+  xlab("Mes") +  
+  ylab("Fallecimientos") +
+  geom_bar(stat="identity", position="dodge") +
   coord_flip() +
-  ggtitle("Fallecidos por Covid-19 en Costa Rica") +
-  xlab("Mes") +
-  ylab("Total fallecidos") +
-  theme_ipsum_pub()
-
+    theme(     
+    legend.box = "horizontal",     
+    legend.key = element_blank(),     
+    legend.title = element_blank(),     
+    legend.position = "top"  )
+  
 ```
 
-```{r}
-ggplot()+
-  geom_col(data = sum(mujeres), aes (x = mes, y = suma_mujeres_fallecidas, color = "blue"))+
-  geom_col(data = sum(hombres), aes (x = mes, y = suma_hombres_fallecidos, color = "green"))
-```
 
+ 
