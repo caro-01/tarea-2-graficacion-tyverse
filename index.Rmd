@@ -1,5 +1,5 @@
 ---
-title: "Tarea 2: Graficación con Tidyverse"
+title: "Tarea 2: Graficación datos hidrológicos y COVID-19 con Tidyverse"
 output: html_document
 ---
 
@@ -41,13 +41,13 @@ library(hrbrthemes)
 ## 1. Realizar un gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año:
 
 
-```{r}
+```{r Cargar_datos_hidrologicos}
 # Carga de datos desde un archivo CSV
 rios <-
   read.csv(file = 'https://raw.githubusercontent.com/tpb728O-programaciongeoespacialr/2021ii/main/datos/hidrologia/fdc/fdc.csv')
 ```
 
-```{r Cambiar nombre columas ríos}
+```{r Cambiar_nombre_columas_ríos}
 # Cambio de nombre de las columnas mediante rename()
 rios <-
   rios %>%
@@ -57,7 +57,7 @@ rios <-
   mutate(fecha = as.Date(fecha, format = "%m/%d/%Y"))
 ```
 
-```{r Sumarización} 
+```{r Datos_hidrológicos} 
 # Selección, renombramiento, filtrado y conversión de columnas rios_sumarizado_x_mes 
 rios_sumarizados_x_mes <-  
   rios %>%  
@@ -93,6 +93,7 @@ ggplot() + geom_col(
   ggtitle( "Caudal mensual de los ríos Pandora y Bananito, Costa Rica") +  
   xlab("Mes") +   
   ylab("Caudal") +
+  scale_fill_manual(values = c("#4682B4", "#EEEE00")) +
   coord_flip() +
   theme(     
     legend.box = "horizontal",     
@@ -104,7 +105,7 @@ ggplot() + geom_col(
 
 ## 2. Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
 
-```{r}
+```{r Cargar_datos_COVID_19}
 # Carga de datos desde un archivo CSV
 covid <- 
   read.csv(
@@ -113,7 +114,7 @@ covid <-
   )
 ```
 
-```{r Preparar datos Covid}
+```{r Preparar_datos_Covid_19}
 
 # Histograma de casos nuevos de positivos de Covid - 19
 
@@ -127,7 +128,7 @@ covid_histo <-
 
 ```{r hacer_histograma}
 ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
-  geom_histogram(stat= 'identity', color= "dark blue", binwidth = 1) +
+  geom_histogram(stat= 'identity', color= "#8B7B8B", binwidth = 1) +
   ggtitle("Distribución de casos nuevos positivos de Covid-19, Costa Rica") +
   xlab("Fecha") +
   ylab("Casos nuevos") +
@@ -135,7 +136,7 @@ ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
 ```
 ## 3. Gráfico de barras agrupadas que muestre la cantidad de hombres y mujeres fallecidos por covid en Costa Rica por cada uno de los 12 meses del año.
 
-```{r}
+```{r Carga_datos_Covid_19}
 # Carga de datos desde un archivo CSV
 covid <- 
   read.csv(
@@ -144,57 +145,49 @@ covid <-
   )
 ```
 
-```{r Cambiar nombre columnas Covid}
-# Cambio de nombre de las columnas mediante rename()
-covid <-
+```{r Preparar_datos_Covid}
+# Selección, renombramiento, filtrado y conversión de columnas datos_covid_sumarizado_x_mes 
+
+datos_covid_sumarizados_x_mes <-
   covid %>%
+  select(FECHA, muj_fall, hom_fall) %>%
   rename(fecha = FECHA,
          mujeres_fallecidas = muj_fall,
          hombres_fallecidos = hom_fall) %>%
-  mutate (fecha = as.Date(fecha, format = "%m/%d/%Y"))
-```
-
-```{r }
-# Selección, renombramiento, filtrado y conversión de columnas datos_covid_sumarizado_x_mes 
-datos_covid_sumarizados_x_mes <-  
-  covid %>%  
-  select(fecha, mujeres_fallecidas, hombres_fallecidos) %>%   
-  rename(fecha = fecha, mujeres = mujeres_fallecidas, hombres = hombres_fallecidos) %>%  
-  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%   
-  group_by(mes = format(fecha,"%m")) %>% 
-  summarise(suma_mujeres_fallecidas = sum(mujeres), suma_hombres_fallecidos = sum(hombres)) %>%
-  filter(mes < 2)
+  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y")) %>%
+  group_by( mes = format(fecha,"%m")) %>%
+  summarise(Total_mujeres_fallecidas = sum(mujeres_fallecidas),
+            Total_hombres_fallecidos = sum(hombres_fallecidos))
 
 # Despliegue del data frame con los resultados rios_sumarizado_x_mes
 datos_covid_sumarizados_x_mes
+
 ```
 
-```{r grafico_barras_agrupadas}
+```{r Gráfico_barras_agrupadas}
 # Grafico de barras agrupadas
 ggplot() + geom_col (
     data = datos_covid_sumarizados_x_mes,     
-    aes(x = mes, y = suma_hombres_fallecidos, fill = "Hombres fallecidos"),     
-    width = 0.4
+    aes(x = mes, y = Total_hombres_fallecidos, fill = "Hombres fallecidos"),     
+    width = 0.4,
+    position = position_nudge(x = -0.15)
     )+   
   
   geom_col (     
   data = datos_covid_sumarizados_x_mes, 
-  aes(x = mes, y = suma_mujeres_fallecidas, fill = "Mujeres fallecidas"),
-  width = 0.4
+  aes(x = mes, y = Total_mujeres_fallecidas, fill = "Mujeres fallecidas"),
+  width = 0.4,
+  position = position_nudge(x =  0.15)
   )+
   
+  scale_fill_manual(values = c("#00868B", "#9AC0CD")) +
   ggtitle( "Total mujeres y hombres fallecidos por Covid-19 en Costa Rica") +   
   xlab("Mes") +  
   ylab("Fallecimientos") +
   geom_bar(stat="identity", position="dodge") +
-  coord_flip() +
     theme(     
-    legend.box = "horizontal",     
-    legend.key = element_blank(),     
+    legend.box = "Vertical",     
     legend.title = element_blank(),     
-    legend.position = "top"  )
+    plot.title = element_text(size = 12, face = "bold"))
   
 ```
-
-
- 
