@@ -38,7 +38,7 @@ library(hrbrthemes)
 ```
 
 
-## 1. Realizar un gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año:
+### 1. Realizar un gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año:
 
 
 ```{r Cargar_datos_hidrologicos}
@@ -103,7 +103,7 @@ ggplot() + geom_col(
  
 ```
 
-## 2. Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
+### 2. Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
 
 ```{r Cargar_datos_COVID_19}
 # Carga de datos desde un archivo CSV
@@ -135,7 +135,8 @@ ggplot(covid_histo, aes(x = fecha, y = nuevos_positivos)) +
   theme_replace()
 ```
 
-## 3. Gráfico de barras agrupadas que muestre la cantidad de hombres y mujeres fallecidos por covid en Costa Rica por cada uno de los 12 meses del año.
+
+### 3. Gráfico de barras agrupadas que muestre la cantidad de hombres y mujeres fallecidos por covid en Costa Rica por cada uno de los 12 meses del año.
 
 ```{r Carga_datos_Covid_19}
 # Carga de datos desde un archivo CSV
